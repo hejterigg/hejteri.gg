@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>HEJTERI.GG | Standoff 2 Elite Tournament Hub | Since 2018</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #05070a;
+            --bg-deeper: #020304;
+            --card-bg: rgba(12, 16, 24, 0.75);
+            --card-border: rgba(255, 51, 51, 0.25);
+            --primary: #ff3333;
+            --primary-dark: #cc0000;
+            --secondary: #ff7700;
+            --accent: #00f0ff;
+            --accent-purple: #a855f7;
+            --text-main: #f3f4f6;
+            --text-muted: #8a9bb5;
+            --glow-red: rgba(255, 51, 51, 0.5);
+            --glow-cyan: rgba(0, 240, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        h1, h2, h3, .nav-logo, .section-title {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        .gradient-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 40%, rgba(255, 51, 51, 0.08), rgba(0, 0, 0, 0.95));
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        nav {
+            background: rgba(2, 3, 4, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 51, 51, 0.3);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .nav-logo {
+            font-size: 1.6rem;
+            font-weight: 900;
+            text-decoration: none;
+            background: linear-gradient(135deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-logo span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after, .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-main);
+            text-shadow: 0 0 8px var(--primary);
+        }
+
+        .user-nav-status {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-left: 1rem;
+            border-left: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-name-tag {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid rgba(255,51,51,0.4);
+            color: var(--primary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            background: rgba(2, 3, 4, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 1.5rem;
+            gap: 1rem;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            border-bottom: 1px solid var(--primary);
+            z-index: 999;
+        }
+
+        .mobile-menu a {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 0.8rem;
+            text-align: center;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .mobile-menu a:hover {
+            color: var(--text-main);
+            background: rgba(255, 51, 51, 0.05);
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 6rem 2rem 4rem;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 51, 51, 0.2) 0%, transparent 70%);
+            filter: blur(60px);
+            z-index: -1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 51, 51, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1.2rem;
+            border-radius: 50px;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255, 51, 51, 0.3);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2.5rem, 8vw, 5.5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffffff 0%, var(--primary) 40%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 40px rgba(255, 51, 51, 0.3);
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-main {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 4px 20px var(--glow-red);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
+        }
+
+        .btn-main:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 35px rgba(255, 51, 51, 0.7);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            padding: 1rem 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 51, 51, 0.15);
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1.2rem;
+            font-size: 0.8rem;
+        }
+
+        .section {
+            padding: 8rem 2rem 4rem;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        #homePage .section:nth-child(2) {
+            padding-top: 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            font-weight: 900;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 3px;
+        }
+
+        .tournament-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            color: #fff;
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        .card ul {
+            list-style: none;
+        }
+
+        .card ul li {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-muted);
+        }
+
+        .card ul li i {
+            color: var(--primary);
+            font-size: 1.1rem;
+            width: 24px;
+        }
+
+        .tourney-card {
+            background: linear-gradient(135deg, rgba(20, 25, 40, 0.9), rgba(5, 8, 15, 0.95));
+            border-left: 4px solid var(--primary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tourney-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 51, 51, 0.4);
+        }
+
+        .delete-tourney-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0,0,0,0.6);
+            border: none;
+            color: #ff5555;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 50%;
+            transition: 0.2s;
+            z-index: 10;
+        }
+        .delete-tourney-btn:hover {
+            background: #ff3333;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .countdown-timer {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-family: 'Orbitron', monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            border: 1px solid var(--primary);
+            display: inline-block;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1.2rem 1.5rem;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255, 51, 51, 0.08);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            color: var(--secondary);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        td {
+            color: var(--text-muted);
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            font-weight: 900;
+            font-family: 'Orbitron', sans-serif;
+            background: #1e293b;
+            color: #fff;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #f59e0b); color: #000; }
+        .rank-2 { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #000; }
+        .rank-3 { background: linear-gradient(135deg, #ffedd5, #ea580c); color: #000; }
+
+        .form-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 2.5rem;
+            border-radius: 24px;
+            max-width: 500px;
+            margin: 0 auto;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+
+        #registerPage .form-container {
+            max-width: 650px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .auth-toggle-text {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .auth-toggle-text span {
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .discord-mock-login {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            background: #5865F2;
+            color: white;
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+            transition: background 0.3s;
+        }
+
+        .discord-mock-login:hover {
+            background: #4752c4;
+        }
+
+        .separator {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        .separator::before, .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .separator:not(:empty)::before { margin-right: .5em; }
+        .separator:not(:empty)::after { margin-left: .5em; }
+
+        footer {
+            background: var(--bg-deeper);
+            border-top: 1px solid rgba(255, 51, 51, 0.2);
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-socials {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-socials a {
+            color: var(--text-muted);
+            font-size: 1.8rem;
+            transition: all 0.3s;
+        }
+
+        .footer-socials a:hover {
+            color: var(--primary);
+            transform: translateY(-5px) scale(1.1);
+        }
+
+        .admin-form {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--primary);
+        }
+        .admin-form h3 {
+            margin-bottom: 1rem;
+            font-family: 'Orbitron', monospace;
+        }
+        .admin-form input, .admin-form select {
+            width: 100%;
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            background: #1a1f2e;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 8px;
+        }
+        .mobile-menu-btn {
+            display: none;
+            font-size: 1.8rem;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: block; }
+            .hero-content h1 { font-size: 2.2rem; }
+            .btn-container { flex-direction: column; align-items: center; }
+            .btn-main, .btn-secondary { width: 80%; text-align: center; }
+            .section { padding: 6rem 1rem 3rem; }
+            .form-container { padding: 1.5rem; }
+            th, td { padding: 0.8rem; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+    <div class="gradient-overlay"></div>
+
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="nav-logo" onclick="showPage('home'); return false;">HEJTERI<span>.GG</span></a>
+            <ul class="nav-links">
+                <li><a href="#" onclick="showPage('home'); return false;" class="active" id="nav-home">HOME</a></li>
+                <li><a href="#" onclick="showPage('tournaments'); return false;" id="nav-tournaments">TOURNAMENTS</a></li>
+                <li><a href="#" onclick="showPage('leaderboard'); return false;" id="nav-leaderboard">LEADERBOARD</a></li>
+                <li><a href="#" onclick="showPage('register'); return false;" id="nav-register">REGISTER TEAM</a></li>
+                <li id="nav-auth-wrapper">
+                    <a href="#" onclick="showPage('auth'); return false;" id="nav-auth">LOGIN</a>
+                </li>
+            </ul>
+            <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <a href="#" onclick="showPage('home'); toggleMobileMenu(); return false;">HOME</a>
+            <a href="#" onclick="showPage('tournaments'); toggleMobileMenu(); return false;">TOURNAMENTS</a>
+            <a href="#" onclick="showPage('leaderboard'); toggleMobileMenu(); return false;">LEADERBOARD</a>
+            <a href="#" onclick="showPage('register'); toggleMobileMenu(); return false;">REGISTER TEAM</a>
+            <a href="#" id="mobile-nav-auth" onclick="showPage('auth'); toggleMobileMenu(); return false;">LOGIN</a>
+        </div>
+    </nav>
+
+    <!-- HOME PAGE -->
+    <div id="homePage">
+        <section class="hero">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-trophy"></i> ACTIVE SINCE 2018 | STANDOFF 2 ELITE
+                </div>
+                <h1>Standoff 2 Arena</h1>
+                <p>Founded in 2018, HEJTERI clan holds the reins of drama-free organization. Join official e-sports tournaments, showcase your skills on the maps, and dominate the region.</p>
+                <div class="btn-container">
+                    <button class="btn-main" onclick="showPage('tournaments')"><i class="fas fa-calendar-alt"></i> REGISTER TEAM</button>
+                    <a href="https://discord.gg/hejteri" target="_blank" class="btn-secondary"><i class="fab fa-discord"></i> DISCORD</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">ACTIVE COMPETITIONS</h2>
+            <div class="tournament-grid">
+                <div class="card">
+                    <h3>HEJTERI Cup 2026</h3>
+                    <ul>
+                        <li><i class="fas fa-crosshairs"></i> <span><strong>Discipline:</strong> Standoff 2 (5v5)</span></li>
+                        <li><i class="fas fa-layer-group"></i> <span><strong>System:</strong> Groups + Playoffs</span></li>
+                        <li><i class="fas fa-award"></i> <span><strong>Prize:</strong> 500€ + In-game Gold</span></li>
+                        <li><i class="fas fa-shield-halved"></i> <span><strong>Protection:</strong> Anti-Cheat System</span></li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Participation Rules</h3>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> <span>Maps: Sandstone, Rust, Province, Zone 9</span></li>
+                        <li><i class="fas fa-check-circle"></i> <span>No emulators or mods allowed</span></li>
+                        <li><i class="fas fa-check-circle"></i> <span>Communication only via Discord</span></li>
+                        <li><i class="fas fa-check-circle"></i> <span>Active & stable community since 2018</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- TOURNAMENTS PAGE -->
+    <div id="tournamentsPage" style="display: none;">
+        <section class="section">
+            <h2 class="section-title">UPCOMING TOURNAMENTS</h2>
+            <div id="tournamentsList" class="tournament-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;"></div>
+        </section>
+    </div>
+
+    <!-- LEADERBOARD PAGE -->
+    <div id="leaderboardPage" style="display: none;">
+        <section class="section">
+            <h2 class="section-title">CURRENT RANKINGS</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Position</th><th>Team Name</th><th>Matches</th><th>Wins</th><th>Points</th></tr>
+                    </thead>
+                    <tbody id="leaderboardBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- REGISTER PAGE (TEAM REGISTRATION) -->
+    <div id="registerPage" style="display: none;">
+        <section class="section">
+            <h2 class="section-title">TEAM REGISTRATION</h2>
+            <div class="form-container">
+                <form id="registerTeamForm">
+                    <div class="form-group"><label for="tname">Your Clan / Team Name</label><input type="text" id="tname" placeholder="Enter official name" required></div>
+                    <div class="form-group"><label for="discord">Captain's Discord Username</label><input type="text" id="discord" placeholder="e.g. captain_name" required></div>
+                    <div class="form-group"><label for="ids">Standoff 2 Player IDs (5 IDs)</label><input type="text" id="ids" placeholder="e.g. 12345678, 87654321, ..." required></div>
+                    <button type="submit" class="btn-main" style="width: 100%;">SUBMIT REGISTRATION</button>
+                    <div id="registerMessage" style="margin-top: 1rem; text-align: center;"></div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <!-- AUTH PAGE (LOGIN & REGISTER) -->
+    <div id="authPage" style="display: none;">
+        <section class="section">
+            <h2 class="section-title" id="auth-title">USER LOGIN</h2>
+            
+            <div class="form-container" id="login-panel">
+                <button class="discord-mock-login" onclick="simulateDiscordAuth()"><i class="fab fa-discord"></i> Login with Discord</button>
+                <div class="separator">OR WITH EMAIL</div>
+                <form id="loginForm">
+                    <div class="form-group"><label>Email Address</label><input type="email" id="login-email" placeholder="your_email@gmail.com" required></div>
+                    <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" required></div>
+                    <button type="submit" class="btn-main" style="width: 100%;">LOGIN</button>
+                    <div id="loginMessage" style="margin-top: 1rem; text-align: center;"></div>
+                </form>
+                <p class="auth-toggle-text">Don't have an account? <span onclick="toggleAuthPanels('register')">Sign up</span></p>
+            </div>
+
+            <div class="form-container" id="register-panel" style="display: none;">
+                <form id="signUpForm">
+                    <div class="form-group"><label>Username (Gaming Nick)</label><input type="text" id="reg-username" placeholder="e.g. Nugato" required></div>
+                    <div class="form-group"><label>Email Address</label><input type="email" id="reg-email" placeholder="your_email@gmail.com" required></div>
+                    <div class="form-group"><label>Password</label><input type="password" id="reg-password" placeholder="Min. 6 characters" required></div>
+                    <button type="submit" class="btn-main" style="width: 100%;">CREATE ACCOUNT</button>
+                    <div id="signUpMessage" style="margin-top: 1rem; text-align: center;"></div>
+                </form>
+                <p class="auth-toggle-text">Already have an account? <span onclick="toggleAuthPanels('login')">Login</span></p>
+            </div>
+        </section>
+    </div>
+
+    <!-- ADMIN PANEL (only for OWNER) -->
+    <div id="adminPage" style="display: none;">
+        <section class="section">
+            <h2 class="section-title">⚙️ ADMIN PANEL - MANAGE TOURNAMENTS</h2>
+            <div class="admin-form">
+                <h3><i class="fas fa-plus-circle"></i> Add New Tournament</h3>
+                <form id="adminAddTourneyForm">
+                    <input type="text" id="tourneyName" placeholder="Tournament name (e.g. HEJTERI CUP #5)" required>
+                    <input type="text" id="tourneyPrize" placeholder="Prize (e.g. 700€)" required>
+                    <input type="datetime-local" id="tourneyDate" required>
+                    <input type="text" id="tourneySlots" placeholder="Slots (e.g. 14/32)" required>
+                    <input type="text" id="tourneyFormat" placeholder="Format (e.g. 5v5)" required>
+                    <select id="tourneyIcon">
+                        <option value="fa-fire">🔥 Fire</option>
+                        <option value="fa-bolt">⚡ Bolt</option>
+                        <option value="fa-crown">👑 Crown</option>
+                        <option value="fa-skull">💀 Skull</option>
+                    </select>
+                    <button type="submit" class="btn-main" style="margin-top: 0.5rem;">➕ Create Tournament</button>
+                </form>
+            </div>
+            <div id="adminTournamentsList" style="display: grid; gap: 1rem; margin-top: 2rem;"></div>
+        </section>
+    </div>
+
+    <footer>
+        <div class="footer-socials">
+            <a href="https://discord.gg/hejteri" target="_blank"><i class="fab fa-discord"></i></a>
+            <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="#" target="_blank"><i class="fab fa-tiktok"></i></a>
+            <a href="#" target="_blank"><i class="fab fa-twitch"></i></a>
+        </div>
+        <p>&copy; 2026 HEJTERI.GG — Standoff 2 Elite Clan. Active since 2018. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let tournaments = [];
+        
+        function loadTournamentsFromStorage() {
+            const stored = localStorage.getItem('tournamentsList');
+            if(stored) {
+                tournaments = JSON.parse(stored);
+            } else {
+                tournaments = [
+                    { id: 1, name: "HEJTERI CUP #4", prize: "500€", date: "2026-06-20T18:00:00", slots: "28/64", format: "5v5", icon: "fa-fire" },
+                    { id: 2, name: "NO MERCY 2v2", prize: "300€", date: "2026-06-25T19:00:00", slots: "18/32", format: "2v2", icon: "fa-bolt" },
+                    { id: 3, name: "ELITE CLASH", prize: "1000€", date: "2026-07-05T20:00:00", slots: "12/16", format: "5v5", icon: "fa-crown" }
+                ];
+                saveTournamentsToStorage();
+            }
+        }
+        
+        function saveTournamentsToStorage() {
+            localStorage.setItem('tournamentsList', JSON.stringify(tournaments));
+        }
+        
+        function addTournament(tourney) {
+            const newId = tournaments.length > 0 ? Math.max(...tournaments.map(t=>t.id)) + 1 : 1;
+            tournaments.push({ id: newId, ...tourney });
+            saveTournamentsToStorage();
+        }
+        
+        function deleteTournamentById(id) {
+            tournaments = tournaments.filter(t => t.id !== id);
+            saveTournamentsToStorage();
+        }
+        
+        let countdownIntervals = [];
+        
+        function renderTournaments() {
+            const container = document.getElementById('tournamentsList');
+            if (!container) return;
+            container.innerHTML = '';
+            const currentUser = localStorage.getItem('loggedUser');
+            const isOwner = (currentUser === 'HEJTERI_OWNER');
+            
+            tournaments.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'tourney-card';
+                let deleteBtn = '';
+                if(isOwner) {
+                    deleteBtn = `<button class="delete-tourney-btn" onclick="event.stopPropagation(); deleteTournamentAndRefresh(${t.id})"><i class="fas fa-trash-alt"></i></button>`;
+                }
+                card.innerHTML = `
+                    ${deleteBtn}
+                    <i class="fas ${t.icon}" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem; display: inline-block;"></i>
+                    <h3 style="font-size: 1.4rem; margin-bottom: 1rem;">${escapeHtml(t.name)}</h3>
+                    <p><i class="fas fa-tag"></i> Prize: ${escapeHtml(t.prize)}</p>
+                    <p><i class="fas fa-users"></i> Slots: ${escapeHtml(t.slots)}</p>
+                    <p><i class="fas fa-gamepad"></i> Format: ${escapeHtml(t.format)}</p>
+                    <div class="countdown-timer" style="margin: 1rem 0;" data-date="${t.date}">--d --h --m</div>
+                    <button class="btn-main btn-small" onclick="handleTournamentRegister('${escapeHtml(t.name)}')">REGISTER</button>
+                `;
+                container.appendChild(card);
+            });
+            startAllCountdowns();
+        }
+        
+        function deleteTournamentAndRefresh(id) {
+            if(confirm("Delete this tournament?")) {
+                deleteTournamentById(id);
+                if(document.getElementById('tournamentsPage').style.display !== 'none') renderTournaments();
+                if(document.getElementById('adminPage').style.display !== 'none') renderAdminTournamentsList();
+            }
+        }
+        
+        function renderAdminTournamentsList() {
+            const container = document.getElementById('adminTournamentsList');
+            if(!container) return;
+            container.innerHTML = '<h3 style="color:var(--accent)">📋 All Tournaments List:</h3>';
+            tournaments.forEach(t => {
+                const div = document.createElement('div');
+                div.className = 'tourney-card';
+                div.style.marginBottom = '1rem';
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items:center;">
+                        <div><strong>${escapeHtml(t.name)}</strong> | ${t.prize} | ${t.date} | Slots: ${t.slots}</div>
+                        <button class="btn-small" style="background:#ff3333; border:none; padding:0.3rem 0.8rem; border-radius:8px;" onclick="deleteTournamentAndRefresh(${t.id})">Delete</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;});}
+        
+        function startAllCountdowns() {
+            countdownIntervals.forEach(clearInterval);
+            countdownIntervals = [];
+            const elements = document.querySelectorAll('.countdown-timer[data-date]');
+            elements.forEach(el => {
+                const target = new Date(el.getAttribute('data-date')).getTime();
+                const interval = setInterval(() => {
+                    const now = new Date().getTime();
+                    const diff = target - now;
+                    if (diff <= 0) { el.innerText = 'STARTED!'; clearInterval(interval); return; }
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    el.innerText = `${days}d ${hours}h ${mins}m`;
+                }, 1000);
+                countdownIntervals.push(interval);
+            });
+        }
+        
+        const leaderboard = [
+            { rank: 1, name: "HEJTERI Official Clan", matches: 12, wins: 11, points: 33 },
+            { rank: 2, name: "Balkan Force", matches: 12, wins: 9, points: 27 },
+            { rank: 3, name: "Sandstone Predators", matches: 12, wins: 8, points: 24 }
+        ];
+        
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboardBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            leaderboard.forEach(team => {
+                const rankClass = team.rank === 1 ? 'rank-1' : (team.rank === 2 ? 'rank-2' : (team.rank === 3 ? 'rank-3' : ''));
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="rank-badge ${rankClass}">${team.rank}</span></td>
+                    <td><strong style="color: #fff;">${team.name}</strong></td>
+                    <td>${team.matches}</td><td>${team.wins}</td>
+                    <td style="color: var(--accent); font-weight: 700;">${team.points}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+        
+        function showPage(page) {
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('tournamentsPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
+            document.getElementById('registerPage').style.display = 'none';
+            document.getElementById('authPage').style.display = 'none';
+            document.getElementById('adminPage').style.display = 'none';
+            
+            if (page === 'home') document.getElementById('homePage').style.display = 'block';
+            if (page === 'tournaments') { document.getElementById('tournamentsPage').style.display = 'block'; renderTournaments(); }
+            if (page === 'leaderboard') { document.getElementById('leaderboardPage').style.display = 'block'; renderLeaderboard(); }
+            if (page === 'register') document.getElementById('registerPage').style.display = 'block';
+            if (page === 'auth') document.getElementById('authPage').style.display = 'block';
+            if (page === 'admin') document.getElementById('adminPage').style.display = 'block';
+            
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            if (page === 'home') document.getElementById('nav-home')?.classList.add('active');
+            if (page === 'tournaments') document.getElementById('nav-tournaments')?.classList.add('active');
+            if (page === 'leaderboard') document.getElementById('nav-leaderboard')?.classList.add('active');
+            if (page === 'register') document.getElementById('nav-register')?.classList.add('active');
+            if (page === 'auth') document.getElementById('nav-auth')?.classList.add('active');
+            if (page === 'admin') document.getElementById('nav-admin')?.classList.add('active');
+            window.scrollTo(0,0);
+        }
+        
+        function toggleMobileMenu() { const menu = document.getElementById('mobileMenu'); menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex'; }
+        
+        function toggleAuthPanels(panel) {
+            const loginPanel = document.getElementById('login-panel');
+            const registerPanel = document.getElementById('register-panel');
+            const authTitle = document.getElementById('auth-title');
+            if (panel === 'register') { loginPanel.style.display = 'none'; registerPanel.style.display = 'block'; authTitle.innerText = "CREATE NEW ACCOUNT"; } 
+            else { loginPanel.style.display = 'block'; registerPanel.style.display = 'none'; authTitle.innerText = "USER LOGIN"; }
+        }
+        
+        function ensureOwnerAccount() {
+            const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            const ownerExists = users.some(u => u.email === 'owner@hejteri.gg');
+            if(!ownerExists){
+                users.push({ username: "HEJTERI_OWNER", email: "owner@hejteri.gg", password: "admin123" });
+                localStorage.setItem('registeredUsers', JSON.stringify(users));
+            }
+        }
+        
+        function checkUserSession() {
+            const loggedUser = localStorage.getItem('loggedUser');
+            const desktopWrapper = document.getElementById('nav-auth-wrapper');
+            const mobileAuthBtn = document.getElementById('mobile-nav-auth');
+            const isOwner = (loggedUser === 'HEJTERI_OWNER');
+            
+            let navLinks = document.querySelector('.nav-links');
+            let adminLinkExists = document.getElementById('nav-admin');
+            if(isOwner && !adminLinkExists) {
+                const newLi = document.createElement('li');
+                newLi.id = 'nav-admin-wrapper';
+                newLi.innerHTML = '<a href="#" onclick="showPage(\'admin\'); return false;" id="nav-admin">🔧 ADMIN</a>';
+                const registerLi = document.getElementById('nav-register')?.parentNode;
+                if(registerLi) registerLi.insertAdjacentElement('afterend', newLi);
+            } else if(!isOwner && adminLinkExists) {
+                adminLinkExists.parentNode?.remove();
+            }
+            
+            if (loggedUser) {
+                desktopWrapper.innerHTML = `<div class="user-nav-status"><span class="user-name-tag"><i class="fas fa-user-shield"></i> ${loggedUser}</span><button class="btn-logout" onclick="logoutUser()">LOGOUT</button></div>`;
+                if(mobileAuthBtn) { mobileAuthBtn.innerHTML = `<i class="fas fa-sign-out-alt"></i> LOGOUT (${loggedUser})`; mobileAuthBtn.setAttribute('onclick', 'logoutUser(); toggleMobileMenu(); return false;'); }
+            } else {
+                desktopWrapper.innerHTML = `<a href="#" onclick="showPage('auth'); return false;" id="nav-auth">LOGIN</a>`;
+                if(mobileAuthBtn) { mobileAuthBtn.innerHTML = "LOGIN"; mobileAuthBtn.setAttribute('onclick', "showPage('auth'); toggleMobileMenu(); return false;"); }
+            }
+            if(window.location.href.includes('#admin') && !isOwner) showPage('home');
+        }
+        
+        document.getElementById('loginForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            const user = users.find(u => u.email === email && u.password === password);
+            if (!user) { document.getElementById('loginMessage').innerHTML = '<span style="color: var(--primary);">❌ Wrong email or password!</span>'; return; }
+            localStorage.setItem('loggedUser', user.username);
+            document.getElementById('loginMessage').innerHTML = '<span style="color: #00ff88;">✅ Login successful!</span>';
+            setTimeout(() => { checkUserSession(); showPage('home'); }, 1000);
+        });
+        
+        document.getElementById('signUpForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('reg-username').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            if (password.length < 6) { document.getElementById('signUpMessage').innerHTML = '<span style="color: var(--primary);">❌ Password must be at least 6 characters.</span>'; return; }
+            const users = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            if (users.some(u => u.email === email || u.username.toLowerCase() === username.toLowerCase())) { document.getElementById('signUpMessage').innerHTML = '<span style="color: var(--primary);">❌ Email or Username already exists!</span>'; return; }
+            users.push({ username, email, password });
+            localStorage.setItem('registeredUsers', JSON.stringify(users));
+            document.getElementById('signUpMessage').innerHTML = '<span style="color: #00ff88;">✅ Account created! Please login.</span>';
+            setTimeout(() => { toggleAuthPanels('login'); }, 1500);
+        });
+        
+        function simulateDiscordAuth() {
+            const mockDiscordNick = prompt("Enter your Discord Gaming Tag (OAuth simulation):", "BalkanLegion_Chef");
+            if(mockDiscordNick) { localStorage.setItem('loggedUser', mockDiscordNick); checkUserSession(); showPage('home'); }
+        }
+        
+        function logoutUser() { localStorage.removeItem('loggedUser'); checkUserSession(); showPage('home'); }
+        
+        document.getElementById('registerTeamForm')?.addEventListener('submit', function(e) { e.preventDefault(); document.getElementById('registerMessage').innerHTML = '<span style="color: #00ff88;">✅ Team registration submitted!</span>'; this.reset(); setTimeout(()=>{document.getElementById('registerMessage').innerHTML='';},3000); });
+        
+        function handleTournamentRegister(tName) {
+            const currentUser = localStorage.getItem('loggedUser');
+            if(!currentUser) { alert(`You must be logged in to register for ${tName}!`); showPage('auth'); } 
+            else { showPage('register'); document.getElementById('tname').value = `${currentUser} Team`; }
+        }
+        
+        document.getElementById('adminAddTourneyForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const currentUser = localStorage.getItem('loggedUser');
+            if(currentUser !== 'HEJTERI_OWNER') { alert("Only owner can add tournaments."); return; }
+            const name = document.getElementById('tourneyName').value.trim();
+            const prize = document.getElementById('tourneyPrize').value.trim();
+            const dateRaw = document.getElementById('tourneyDate').value;
+            const slots = document.getElementById('tourneySlots').value.trim();
+            const format = document.getElementById('tourneyFormat').value.trim();
+            const icon = document.getElementById('tourneyIcon').value;
+            if(!name || !prize || !dateRaw || !slots || !format) { alert("Please fill all fields!"); return; }
+            const dateISO = new Date(dateRaw).toISOString().slice(0,16).replace('T','T');
+            addTournament({ name, prize, date: dateISO, slots, format, icon });
+            renderAdminTournamentsList();
+            if(document.getElementById('tournamentsPage').style.display !== 'none') renderTournaments();
+            this.reset();
+            alert(`Tournament "${name}" added!`);
+        });
+        
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        class Particle3D { constructor() { this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height; this.size = Math.random() * 2 + 0.5; this.speedX = (Math.random() - 0.5) * 0.4; this.speedY = (Math.random() - 0.7) * 0.3; this.color = Math.random() > 0.6 ? '#ff3333' : '#ff7700'; } update() { this.x += this.speedX; this.y += this.speedY; if (this.y < 0) this.y = canvas.height; if (this.y > canvas.height) this.y = 0; if (this.x < 0) this.x = canvas.width; if (this.x > canvas.width) this.x = 0; } draw() { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); } }
+        function initParticles() { particles = []; for (let i = 0; i < 60; i++) particles.push(new Particle3D()); }
+        function animateBackground() { ctx.fillStyle = 'rgba(5, 7, 10, 0.15)'; ctx.fillRect(0, 0, canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateBackground); }
+        initParticles(); animateBackground();
+        
+        ensureOwnerAccount();
+        loadTournamentsFromStorage();
+        renderLeaderboard();
+        checkUserSession();
+    </script>
+</body>
+</html>

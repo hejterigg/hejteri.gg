@@ -647,6 +647,26 @@
             color: var(--primary);
             cursor: pointer;
         }
+        
+        .error-message {
+            background: rgba(255, 51, 51, 0.2);
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: center;
+            color: var(--primary);
+        }
+        
+        .success-message {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: center;
+            color: #00ff88;
+        }
 
         @media (max-width: 768px) {
             .nav-links { display: none; }
@@ -700,7 +720,7 @@
                 <h1>Standoff 2 Arena</h1>
                 <p>Founded in 2018, HEJTERI clan holds the reins of drama-free organization. Join official e-sports tournaments, showcase your skills on the maps, and dominate the region.</p>
                 <div class="btn-container">
-                    <button class="btn-main" onclick="showPage('tournaments')"><i class="fas fa-calendar-alt"></i> REGISTER TEAM</button>
+                    <button class="btn-main" onclick="showPage('tournaments')"><i class="fas fa-calendar-alt"></i> VIEW TOURNAMENTS</button>
                     <a href="https://discord.gg/hejteri" target="_blank" class="btn-secondary"><i class="fab fa-discord"></i> DISCORD</a>
                 </div>
             </div>
@@ -849,69 +869,170 @@
         };
         
         // Inicijalizacija Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        let app, auth, db;
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            console.log("✅ Firebase initialized successfully");
+        } catch (error) {
+            console.error("❌ Firebase initialization error:", error);
+            alert("Firebase initialization error. Please check your configuration.");
+        }
         
         // ==================== GLOBALNE VARIJABLE ====================
         let tournaments = [];
         let countdownIntervals = [];
         let currentUser = null;
         
+        // Default turniri za fallback
+        const defaultTournaments = [
+            { name: "HEJTERI CUP #4", prize: "500€", date: "2026-06-20T18:00:00", slots: "28/64", format: "5v5", icon: "fa-fire" },
+            { name: "NO MERCY 2v2", prize: "300€", date: "2026-06-25T19:00:00", slots: "18/32", format: "2v2", icon: "fa-bolt" },
+            { name: "ELITE CLASH", prize: "1000€", date: "2026-07-05T20:00:00", slots: "12/16", format: "5v5", icon: "fa-crown" }
+        ];
+        
+        // ==================== POMOĆNE FUNKCIJE ====================
+        function showMessage(elementId, message, isError = true) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = `<span style="color: ${isError ? '#ff3333' : '#00ff88'};">${isError ? '❌ ' : '✅ '}${message}</span>`;
+                setTimeout(() => {
+                    if (element.innerHTML.includes(message)) {
+                        element.innerHTML = '';
+                    }
+                }, 5000);
+            }
+        }
+        
+        function saveTournamentsToCache(tournamentsData) {
+            try {
+                localStorage.setItem('cachedTournaments', JSON.stringify(tournamentsData));
+                localStorage.setItem('cachedTournamentsTime', Date.now().toString());
+            } catch (e) {
+                console.error("Failed to cache tournaments:", e);
+            }
+        }
+        
+        function loadTournamentsFromCache() {
+            try {
+                const cached = localStorage.getItem('cachedTournaments');
+                const cachedTime = localStorage.getItem('cachedTournamentsTime');
+                if (cached && cachedTime) {
+                    const age = Date.now() - parseInt(cachedTime);
+                    if (age < 3600000) { // Cache valid 1 sat
+                        return JSON.parse(cached);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to load from cache:", e);
+            }
+            return null;
+        }
+        
         // ==================== FIRESTORE FUNKCIJE ====================
         
         async function loadTournamentsFromFirestore() {
+            if (!db) {
+                console.error("Firestore not initialized");
+                useDefaultTournaments();
+                return;
+            }
+            
             try {
+                // Pokušaj dohvatiti iz Firestore
                 const snapshot = await db.collection('tournaments').orderBy('date').get();
                 tournaments = [];
                 snapshot.forEach(doc => {
                     tournaments.push({ id: doc.id, ...doc.data() });
                 });
+                
                 if (tournaments.length === 0) {
-                    await addDefaultTournaments();
+                    // Ako nema turnira, dodaj defaultne u Firestore
+                    await addDefaultTournamentsToFirestore();
+                } else {
+                    // Spremi u cache
+                    saveTournamentsToCache(tournaments);
                 }
+                
                 renderTournaments();
                 renderAdminTournamentsList();
+                
             } catch (error) {
                 console.error("Greška pri učitavanju turnira:", error);
+                
+                // Pokušaj učitati iz cache-a
+                const cachedTournaments = loadTournamentsFromCache();
+                if (cachedTournaments && cachedTournaments.length > 0) {
+                    console.log("Using cached tournaments");
+                    tournaments = cachedTournaments;
+                    renderTournaments();
+                    renderAdminTournamentsList();
+                    showMessage('tournamentsList', 'Using cached data. Some features may be limited.', true);
+                } else {
+                    // Koristi defaultne turnire
+                    useDefaultTournaments();
+                }
             }
         }
         
-        async function addDefaultTournaments() {
-            const defaultTourneys = [
-                { name: "HEJTERI CUP #4", prize: "500€", date: "2026-06-20T18:00:00", slots: "28/64", format: "5v5", icon: "fa-fire" },
-                { name: "NO MERCY 2v2", prize: "300€", date: "2026-06-25T19:00:00", slots: "18/32", format: "2v2", icon: "fa-bolt" },
-                { name: "ELITE CLASH", prize: "1000€", date: "2026-07-05T20:00:00", slots: "12/16", format: "5v5", icon: "fa-crown" }
-            ];
+        function useDefaultTournaments() {
+            tournaments = defaultTournaments.map((t, index) => ({ id: `default-${index}`, ...t }));
+            renderTournaments();
+            renderAdminTournamentsList();
+            showMessage('tournamentsList', 'Using default tournaments. Connect to Firebase for full features.', true);
+        }
+        
+        async function addDefaultTournamentsToFirestore() {
+            if (!db) return;
             
-            for (const tourney of defaultTourneys) {
-                await db.collection('tournaments').add(tourney);
+            try {
+                for (const tourney of defaultTournaments) {
+                    await db.collection('tournaments').add(tourney);
+                }
+                await loadTournamentsFromFirestore();
+            } catch (error) {
+                console.error("Error adding default tournaments:", error);
+                useDefaultTournaments();
             }
-            await loadTournamentsFromFirestore();
         }
         
         async function addTournament(tourney) {
+            if (!db) {
+                alert("Firebase not connected. Cannot add tournament.");
+                return false;
+            }
+            
             try {
                 const docRef = await db.collection('tournaments').add(tourney);
                 tournaments.push({ id: docRef.id, ...tourney });
+                saveTournamentsToCache(tournaments);
                 renderTournaments();
                 renderAdminTournamentsList();
                 return true;
             } catch (error) {
                 console.error("Greška pri dodavanju turnira:", error);
+                alert(`Failed to add tournament: ${error.message}`);
                 return false;
             }
         }
         
         async function deleteTournamentById(id) {
+            if (!db) {
+                alert("Firebase not connected. Cannot delete tournament.");
+                return false;
+            }
+            
             try {
                 await db.collection('tournaments').doc(id).delete();
                 tournaments = tournaments.filter(t => t.id !== id);
+                saveTournamentsToCache(tournaments);
                 renderTournaments();
                 renderAdminTournamentsList();
                 return true;
             } catch (error) {
                 console.error("Greška pri brisanju turnira:", error);
+                alert(`Failed to delete tournament: ${error.message}`);
                 return false;
             }
         }
@@ -919,84 +1040,145 @@
         // ==================== AUTH FUNKCIJE ====================
         
         async function signInWithGoogle() {
+            if (!auth) {
+                alert("Firebase Auth not initialized. Please check your configuration.");
+                return;
+            }
+            
             const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({
+                prompt: 'select_account'
+            });
+            
             try {
                 const result = await auth.signInWithPopup(provider);
                 currentUser = result.user;
-                document.getElementById('loginMessage').innerHTML = '<span style="color: #00ff88;">✅ Login successful!</span>';
+                showMessage('loginMessage', 'Login successful! Redirecting...', false);
+                
+                // Spremi usera u Firestore ako ne postoji
+                if (db) {
+                    const userRef = db.collection('users').doc(currentUser.uid);
+                    const userDoc = await userRef.get();
+                    if (!userDoc.exists) {
+                        await userRef.set({
+                            username: currentUser.displayName || currentUser.email.split('@')[0],
+                            email: currentUser.email,
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                }
+                
                 setTimeout(() => {
                     checkUserSession();
                     showPage('home');
-                }, 1000);
+                }, 1500);
             } catch (error) {
                 console.error("Google login error:", error);
-                document.getElementById('loginMessage').innerHTML = '<span style="color: var(--primary);">❌ Google login failed!</span>';
+                if (error.code === 'auth/popup-blocked') {
+                    alert("Popup was blocked! Please allow popups for this site and try again.");
+                } else if (error.code === 'auth/unauthorized-domain') {
+                    alert("This domain is not authorized for Firebase. Please add it to Firebase Console → Authentication → Authorized domains.");
+                } else {
+                    showMessage('loginMessage', `Login failed: ${error.message}`, true);
+                }
             }
         }
         
         async function signUpWithEmail(email, password, username) {
+            if (!auth) {
+                alert("Firebase Auth not initialized.");
+                return { success: false, error: "Auth not initialized" };
+            }
+            
             try {
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                await db.collection('users').doc(userCredential.user.uid).set({
-                    username: username,
-                    email: email,
-                    createdAt: new Date().toISOString()
-                });
+                if (db) {
+                    await db.collection('users').doc(userCredential.user.uid).set({
+                        username: username,
+                        email: email,
+                        createdAt: new Date().toISOString()
+                    });
+                }
                 return { success: true };
             } catch (error) {
+                console.error("Signup error:", error);
                 return { success: false, error: error.message };
             }
         }
         
         async function signInWithEmail(email, password) {
+            if (!auth) {
+                alert("Firebase Auth not initialized.");
+                return { success: false, error: "Auth not initialized" };
+            }
+            
             try {
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 return { success: true, user: userCredential.user };
             } catch (error) {
+                console.error("Login error:", error);
                 return { success: false, error: error.message };
             }
         }
         
         async function logoutUser() {
+            if (!auth) return;
+            
             try {
                 await auth.signOut();
                 currentUser = null;
                 checkUserSession();
                 showPage('home');
+                showMessage('loginMessage', 'Logged out successfully!', false);
             } catch (error) {
                 console.error("Logout error:", error);
+                alert(`Logout failed: ${error.message}`);
             }
         }
         
         function checkUserSession() {
+            if (!auth) return;
+            
             auth.onAuthStateChanged(async (user) => {
                 currentUser = user;
                 const desktopWrapper = document.getElementById('nav-auth-wrapper');
                 const mobileAuthBtn = document.getElementById('mobile-nav-auth');
                 const isOwner = user && user.email === 'owner@hejteri.gg';
                 
-                let navLinks = document.querySelector('.nav-links');
-                let adminLinkExists = document.getElementById('nav-admin');
+                // Admin link management
+                let adminLinkExists = document.getElementById('nav-admin-wrapper');
                 if(isOwner && !adminLinkExists) {
-                    const newLi = document.createElement('li');
-                    newLi.id = 'nav-admin-wrapper';
-                    newLi.innerHTML = '<a href="#" onclick="showPage(\'admin\'); return false;" id="nav-admin">🔧 ADMIN</a>';
+                    const navLinks = document.querySelector('.nav-links');
                     const registerLi = document.getElementById('nav-register')?.parentNode;
-                    if(registerLi) registerLi.insertAdjacentElement('afterend', newLi);
+                    if (navLinks && registerLi) {
+                        const newLi = document.createElement('li');
+                        newLi.id = 'nav-admin-wrapper';
+                        newLi.innerHTML = '<a href="#" onclick="showPage(\'admin\'); return false;" id="nav-admin">🔧 ADMIN</a>';
+                        registerLi.insertAdjacentElement('afterend', newLi);
+                    }
                 } else if(!isOwner && adminLinkExists) {
-                    adminLinkExists.parentNode?.remove();
+                    adminLinkExists.remove();
                 }
                 
                 if (user) {
                     let displayName = user.displayName || user.email.split('@')[0];
-                    if (user.email === 'owner@hejteri.gg') displayName = 'HEJTERI_OWNER';
-                    desktopWrapper.innerHTML = `<div class="user-nav-status"><span class="user-name-tag"><i class="fas fa-user-shield"></i> ${displayName}</span><button class="btn-logout" onclick="logoutUser()">LOGOUT</button></div>`;
+                    if (user.email === 'owner@hejteri.gg') displayName = '👑 OWNER';
+                    
+                    if (desktopWrapper) {
+                        desktopWrapper.innerHTML = `<div class="user-nav-status">
+                            <span class="user-name-tag"><i class="fas fa-user-shield"></i> ${escapeHtml(displayName)}</span>
+                            <button class="btn-logout" onclick="logoutUser()">LOGOUT</button>
+                        </div>`;
+                    }
+                    
                     if(mobileAuthBtn) { 
-                        mobileAuthBtn.innerHTML = `<i class="fas fa-sign-out-alt"></i> LOGOUT (${displayName})`; 
+                        mobileAuthBtn.innerHTML = `<i class="fas fa-sign-out-alt"></i> LOGOUT (${escapeHtml(displayName)})`; 
                         mobileAuthBtn.setAttribute('onclick', 'logoutUser(); toggleMobileMenu(); return false;'); 
                     }
                 } else {
-                    desktopWrapper.innerHTML = `<a href="#" onclick="showPage('auth'); return false;" id="nav-auth">LOGIN</a>`;
+                    if (desktopWrapper) {
+                        desktopWrapper.innerHTML = `<a href="#" onclick="showPage('auth'); return false;" id="nav-auth">LOGIN</a>`;
+                    }
                     if(mobileAuthBtn) { 
                         mobileAuthBtn.innerHTML = "LOGIN"; 
                         mobileAuthBtn.setAttribute('onclick', "showPage('auth'); toggleMobileMenu(); return false;"); 
@@ -1010,6 +1192,12 @@
         function renderTournaments() {
             const container = document.getElementById('tournamentsList');
             if (!container) return;
+            
+            if (tournaments.length === 0) {
+                container.innerHTML = '<div class="error-message">No tournaments available at the moment.</div>';
+                return;
+            }
+            
             container.innerHTML = '';
             const isOwner = currentUser && currentUser.email === 'owner@hejteri.gg';
             
@@ -1017,18 +1205,18 @@
                 const card = document.createElement('div');
                 card.className = 'tourney-card';
                 let deleteBtn = '';
-                if(isOwner) {
+                if(isOwner && t.id && !t.id.toString().startsWith('default-')) {
                     deleteBtn = `<button class="delete-tourney-btn" onclick="event.stopPropagation(); deleteTournamentAndRefresh('${t.id}')"><i class="fas fa-trash-alt"></i></button>`;
                 }
                 card.innerHTML = `
                     ${deleteBtn}
-                    <i class="fas ${t.icon}" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem; display: inline-block;"></i>
+                    <i class="fas ${t.icon || 'fa-trophy'}" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem; display: inline-block;"></i>
                     <h3 style="font-size: 1.4rem; margin-bottom: 1rem;">${escapeHtml(t.name)}</h3>
                     <p><i class="fas fa-tag"></i> Prize: ${escapeHtml(t.prize)}</p>
                     <p><i class="fas fa-users"></i> Slots: ${escapeHtml(t.slots)}</p>
                     <p><i class="fas fa-gamepad"></i> Format: ${escapeHtml(t.format)}</p>
                     <div class="countdown-timer" style="margin: 1rem 0;" data-date="${t.date}">--d --h --m</div>
-                    <button class="btn-main btn-small" onclick="handleTournamentRegister('${escapeHtml(t.name)}')">REGISTER</button>
+                    <button class="btn-main btn-small" onclick="handleTournamentRegister('${escapeHtml(t.name)}')">REGISTER TEAM</button>
                 `;
                 container.appendChild(card);
             });
@@ -1036,7 +1224,7 @@
         }
         
         async function deleteTournamentAndRefresh(id) {
-            if(confirm("Delete this tournament?")) {
+            if(confirm("Are you sure you want to delete this tournament?")) {
                 await deleteTournamentById(id);
             }
         }
@@ -1044,22 +1232,38 @@
         function renderAdminTournamentsList() {
             const container = document.getElementById('adminTournamentsList');
             if(!container) return;
-            container.innerHTML = '<h3 style="color:var(--accent)">📋 All Tournaments List:</h3>';
+            
+            if (tournaments.length === 0) {
+                container.innerHTML = '<p>No tournaments found.</p>';
+                return;
+            }
+            
+            container.innerHTML = '<h3 style="color:var(--accent); margin-bottom: 1rem;">📋 All Tournaments:</h3>';
             tournaments.forEach(t => {
                 const div = document.createElement('div');
                 div.className = 'tourney-card';
                 div.style.marginBottom = '1rem';
                 div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items:center;">
-                        <div><strong>${escapeHtml(t.name)}</strong> | ${t.prize} | ${t.date} | Slots: ${t.slots}</div>
-                        <button class="btn-small" style="background:#ff3333; border:none; padding:0.3rem 0.8rem; border-radius:8px;" onclick="deleteTournamentAndRefresh('${t.id}')">Delete</button>
+                    <div style="display: flex; justify-content: space-between; align-items:center; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <strong>${escapeHtml(t.name)}</strong> | ${escapeHtml(t.prize)} | ${t.date} | Slots: ${escapeHtml(t.slots)}
+                        </div>
+                        ${t.id && !t.id.toString().startsWith('default-') ? `<button class="btn-small" style="background:#ff3333; border:none; padding:0.3rem 0.8rem; border-radius:8px; cursor:pointer;" onclick="deleteTournamentAndRefresh('${t.id}')">Delete</button>` : '<span style="color:#888;">(Demo)</span>'}
                     </div>
                 `;
                 container.appendChild(div);
             });
         }
         
-        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;});}
+        function escapeHtml(str) { 
+            if(!str) return ''; 
+            return str.replace(/[&<>]/g, function(m){
+                if(m==='&') return '&amp;'; 
+                if(m==='<') return '&lt;'; 
+                if(m==='>') return '&gt;'; 
+                return m;
+            });
+        }
         
         function startAllCountdowns() {
             countdownIntervals.forEach(clearInterval);
@@ -1067,10 +1271,16 @@
             const elements = document.querySelectorAll('.countdown-timer[data-date]');
             elements.forEach(el => {
                 const target = new Date(el.getAttribute('data-date')).getTime();
+                if (isNaN(target)) return;
+                
                 const interval = setInterval(() => {
                     const now = new Date().getTime();
                     const diff = target - now;
-                    if (diff <= 0) { el.innerText = 'STARTED!'; clearInterval(interval); return; }
+                    if (diff <= 0) { 
+                        el.innerText = '🔥 LIVE NOW!'; 
+                        clearInterval(interval); 
+                        return; 
+                    }
                     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -1083,7 +1293,9 @@
         const leaderboardData = [
             { rank: 1, name: "HEJTERI Official Clan", matches: 12, wins: 11, points: 33 },
             { rank: 2, name: "Balkan Force", matches: 12, wins: 9, points: 27 },
-            { rank: 3, name: "Sandstone Predators", matches: 12, wins: 8, points: 24 }
+            { rank: 3, name: "Sandstone Predators", matches: 12, wins: 8, points: 24 },
+            { rank: 4, name: "Phoenix Rising", matches: 12, wins: 7, points: 21 },
+            { rank: 5, name: "Shadow Legion", matches: 12, wins: 6, points: 18 }
         ];
         
         function renderLeaderboard() {
@@ -1095,7 +1307,7 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td><span class="rank-badge ${rankClass}">${team.rank}</span></td>
-                    <td><strong style="color: #fff;">${team.name}</strong></td>
+                    <td><strong style="color: #fff;">${escapeHtml(team.name)}</strong></td>
                     <td>${team.matches}</td>
                     <td>${team.wins}</td>
                     <td style="color: var(--accent); font-weight: 700;">${team.points}</td>
@@ -1105,33 +1317,53 @@
         }
         
         function showPage(page) {
-            document.getElementById('homePage').style.display = 'none';
-            document.getElementById('tournamentsPage').style.display = 'none';
-            document.getElementById('leaderboardPage').style.display = 'none';
-            document.getElementById('registerPage').style.display = 'none';
-            document.getElementById('authPage').style.display = 'none';
-            document.getElementById('adminPage').style.display = 'none';
+            const pages = ['homePage', 'tournamentsPage', 'leaderboardPage', 'registerPage', 'authPage', 'adminPage'];
+            pages.forEach(p => {
+                const el = document.getElementById(p);
+                if (el) el.style.display = 'none';
+            });
             
-            if (page === 'home') document.getElementById('homePage').style.display = 'block';
-            if (page === 'tournaments') { document.getElementById('tournamentsPage').style.display = 'block'; renderTournaments(); }
-            if (page === 'leaderboard') { document.getElementById('leaderboardPage').style.display = 'block'; renderLeaderboard(); }
-            if (page === 'register') document.getElementById('registerPage').style.display = 'block';
-            if (page === 'auth') document.getElementById('authPage').style.display = 'block';
-            if (page === 'admin') document.getElementById('adminPage').style.display = 'block';
+            const pageMap = {
+                'home': 'homePage',
+                'tournaments': 'tournamentsPage',
+                'leaderboard': 'leaderboardPage',
+                'register': 'registerPage',
+                'auth': 'authPage',
+                'admin': 'adminPage'
+            };
             
+            const targetPage = pageMap[page];
+            if (targetPage) {
+                const el = document.getElementById(targetPage);
+                if (el) el.style.display = 'block';
+            }
+            
+            // Refresh data when showing specific pages
+            if (page === 'tournaments') {
+                renderTournaments();
+            }
+            if (page === 'leaderboard') {
+                renderLeaderboard();
+            }
+            if (page === 'admin' && (!currentUser || currentUser.email !== 'owner@hejteri.gg')) {
+                alert("Access denied. Admin only.");
+                showPage('home');
+                return;
+            }
+            
+            // Update active nav links
             document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-            if (page === 'home') document.getElementById('nav-home')?.classList.add('active');
-            if (page === 'tournaments') document.getElementById('nav-tournaments')?.classList.add('active');
-            if (page === 'leaderboard') document.getElementById('nav-leaderboard')?.classList.add('active');
-            if (page === 'register') document.getElementById('nav-register')?.classList.add('active');
-            if (page === 'auth') document.getElementById('nav-auth')?.classList.add('active');
-            if (page === 'admin') document.getElementById('nav-admin')?.classList.add('active');
+            const activeNav = document.getElementById(`nav-${page === 'home' ? 'home' : page === 'tournaments' ? 'tournaments' : page === 'leaderboard' ? 'leaderboard' : page === 'register' ? 'register' : page === 'auth' ? 'auth' : page === 'admin' ? 'admin' : ''}`);
+            if (activeNav) activeNav.classList.add('active');
+            
             window.scrollTo(0,0);
         }
         
         function toggleMobileMenu() { 
             const menu = document.getElementById('mobileMenu'); 
-            menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex'; 
+            if (menu) {
+                menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex'; 
+            }
         }
         
         function toggleAuthPanels(panel) {
@@ -1139,13 +1371,13 @@
             const registerPanel = document.getElementById('register-panel');
             const authTitle = document.getElementById('auth-title');
             if (panel === 'register') { 
-                loginPanel.style.display = 'none'; 
-                registerPanel.style.display = 'block'; 
-                authTitle.innerText = "CREATE NEW ACCOUNT"; 
+                if (loginPanel) loginPanel.style.display = 'none'; 
+                if (registerPanel) registerPanel.style.display = 'block'; 
+                if (authTitle) authTitle.innerText = "CREATE NEW ACCOUNT"; 
             } else { 
-                loginPanel.style.display = 'block'; 
-                registerPanel.style.display = 'none'; 
-                authTitle.innerText = "USER LOGIN"; 
+                if (loginPanel) loginPanel.style.display = 'block'; 
+                if (registerPanel) registerPanel.style.display = 'none'; 
+                if (authTitle) authTitle.innerText = "USER LOGIN"; 
             }
         }
         
@@ -1155,7 +1387,10 @@
                 showPage('auth'); 
             } else { 
                 showPage('register'); 
-                document.getElementById('tname').value = `${currentUser.displayName || currentUser.email.split('@')[0]} Team`; 
+                const teamNameInput = document.getElementById('tname');
+                if (teamNameInput) {
+                    teamNameInput.value = `${currentUser.displayName || currentUser.email.split('@')[0]}'s Team`; 
+                }
             }
         }
         
@@ -1163,32 +1398,48 @@
         
         document.getElementById('loginForm')?.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value;
+            const email = document.getElementById('login-email')?.value.trim();
+            const password = document.getElementById('login-password')?.value;
+            if (!email || !password) {
+                showMessage('loginMessage', 'Please enter email and password', true);
+                return;
+            }
             const result = await signInWithEmail(email, password);
             if (result.success) {
-                document.getElementById('loginMessage').innerHTML = '<span style="color: #00ff88;">✅ Login successful!</span>';
-                setTimeout(() => { showPage('home'); }, 1000);
+                showMessage('loginMessage', 'Login successful! Redirecting...', false);
+                setTimeout(() => { 
+                    showPage('home'); 
+                    document.getElementById('loginForm')?.reset();
+                }, 1500);
             } else {
-                document.getElementById('loginMessage').innerHTML = `<span style="color: var(--primary);">❌ ${result.error}</span>`;
+                showMessage('loginMessage', result.error, true);
             }
         });
         
         document.getElementById('signUpForm')?.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const username = document.getElementById('reg-username').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const password = document.getElementById('reg-password').value;
+            const username = document.getElementById('reg-username')?.value.trim();
+            const email = document.getElementById('reg-email')?.value.trim();
+            const password = document.getElementById('reg-password')?.value;
+            
+            if (!username || !email || !password) {
+                showMessage('signUpMessage', 'Please fill all fields', true);
+                return;
+            }
             if (password.length < 6) { 
-                document.getElementById('signUpMessage').innerHTML = '<span style="color: var(--primary);">❌ Password must be at least 6 characters.</span>'; 
+                showMessage('signUpMessage', 'Password must be at least 6 characters', true);
                 return; 
             }
+            
             const result = await signUpWithEmail(email, password, username);
             if (result.success) {
-                document.getElementById('signUpMessage').innerHTML = '<span style="color: #00ff88;">✅ Account created! Please login.</span>';
-                setTimeout(() => { toggleAuthPanels('login'); }, 1500);
+                showMessage('signUpMessage', 'Account created! Please login.', false);
+                setTimeout(() => { 
+                    toggleAuthPanels('login');
+                    document.getElementById('signUpForm')?.reset();
+                }, 2000);
             } else {
-                document.getElementById('signUpMessage').innerHTML = `<span style="color: var(--primary);">❌ ${result.error}</span>`;
+                showMessage('signUpMessage', result.error, true);
             }
         });
         
@@ -1199,9 +1450,20 @@
                 showPage('auth');
                 return;
             }
-            const teamName = document.getElementById('tname').value;
-            const discord = document.getElementById('discord').value;
-            const ids = document.getElementById('ids').value;
+            
+            const teamName = document.getElementById('tname')?.value;
+            const discord = document.getElementById('discord')?.value;
+            const ids = document.getElementById('ids')?.value;
+            
+            if (!teamName || !discord || !ids) {
+                showMessage('registerMessage', 'Please fill all fields', true);
+                return;
+            }
+            
+            if (!db) {
+                showMessage('registerMessage', 'Cannot register - Firebase not connected. Please try again later.', true);
+                return;
+            }
             
             try {
                 await db.collection('teamRegistrations').add({
@@ -1212,11 +1474,12 @@
                     userEmail: currentUser.email,
                     createdAt: new Date().toISOString()
                 });
-                document.getElementById('registerMessage').innerHTML = '<span style="color: #00ff88;">✅ Team registration submitted!</span>';
-                this.reset();
+                showMessage('registerMessage', 'Team registration submitted successfully!', false);
+                e.target.reset();
                 setTimeout(() => { showPage('home'); }, 2000);
             } catch (error) {
-                document.getElementById('registerMessage').innerHTML = '<span style="color: var(--primary);">❌ Registration failed!</span>';
+                console.error("Registration error:", error);
+                showMessage('registerMessage', `Registration failed: ${error.message}`, true);
             }
         });
         
@@ -1226,64 +1489,89 @@
                 alert("Only owner can add tournaments."); 
                 return; 
             }
-            const name = document.getElementById('tourneyName').value.trim();
-            const prize = document.getElementById('tourneyPrize').value.trim();
-            const dateRaw = document.getElementById('tourneyDate').value;
-            const slots = document.getElementById('tourneySlots').value.trim();
-            const format = document.getElementById('tourneyFormat').value.trim();
-            const icon = document.getElementById('tourneyIcon').value;
-            if(!name || !prize || !dateRaw || !slots || !format) { alert("Please fill all fields!"); return; }
+            
+            const name = document.getElementById('tourneyName')?.value.trim();
+            const prize = document.getElementById('tourneyPrize')?.value.trim();
+            const dateRaw = document.getElementById('tourneyDate')?.value;
+            const slots = document.getElementById('tourneySlots')?.value.trim();
+            const format = document.getElementById('tourneyFormat')?.value.trim();
+            const icon = document.getElementById('tourneyIcon')?.value;
+            
+            if(!name || !prize || !dateRaw || !slots || !format) { 
+                alert("Please fill all fields!"); 
+                return; 
+            }
+            
             const dateISO = new Date(dateRaw).toISOString().slice(0,16).replace('T','T');
-            await addTournament({ name, prize, date: dateISO, slots, format, icon });
-            this.reset();
-            alert(`Tournament "${name}" added!`);
+            const success = await addTournament({ name, prize, date: dateISO, slots, format, icon });
+            if (success) {
+                alert(`Tournament "${name}" added successfully!`);
+                e.target.reset();
+            }
         });
         
         // ==================== CANVAS ANIMACIJA ====================
         const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-        class Particle3D { 
-            constructor() { 
-                this.x = Math.random() * canvas.width; 
-                this.y = Math.random() * canvas.height; 
-                this.size = Math.random() * 2 + 0.5; 
-                this.speedX = (Math.random() - 0.5) * 0.4; 
-                this.speedY = (Math.random() - 0.7) * 0.3; 
-                this.color = Math.random() > 0.6 ? '#ff3333' : '#ff7700'; 
-            } 
-            update() { 
-                this.x += this.speedX; 
-                this.y += this.speedY; 
-                if (this.y < 0) this.y = canvas.height; 
-                if (this.y > canvas.height) this.y = 0; 
-                if (this.x < 0) this.x = canvas.width; 
-                if (this.x > canvas.width) this.x = 0; 
-            } 
-            draw() { 
-                ctx.fillStyle = this.color; 
-                ctx.beginPath(); 
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); 
-                ctx.fill(); 
-            } 
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            function resizeCanvas() { 
+                canvas.width = window.innerWidth; 
+                canvas.height = window.innerHeight; 
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            class Particle3D { 
+                constructor() { 
+                    this.x = Math.random() * canvas.width; 
+                    this.y = Math.random() * canvas.height; 
+                    this.size = Math.random() * 2 + 0.5; 
+                    this.speedX = (Math.random() - 0.5) * 0.4; 
+                    this.speedY = (Math.random() - 0.7) * 0.3; 
+                    this.color = Math.random() > 0.6 ? '#ff3333' : '#ff7700'; 
+                } 
+                update() { 
+                    this.x += this.speedX; 
+                    this.y += this.speedY; 
+                    if (this.y < 0) this.y = canvas.height; 
+                    if (this.y > canvas.height) this.y = 0; 
+                    if (this.x < 0) this.x = canvas.width; 
+                    if (this.x > canvas.width) this.x = 0; 
+                } 
+                draw() { 
+                    ctx.fillStyle = this.color; 
+                    ctx.beginPath(); 
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); 
+                    ctx.fill(); 
+                } 
+            }
+            function initParticles() { 
+                particles = []; 
+                for (let i = 0; i < 60; i++) particles.push(new Particle3D()); 
+            }
+            function animateBackground() { 
+                ctx.fillStyle = 'rgba(5, 7, 10, 0.15)'; 
+                ctx.fillRect(0, 0, canvas.width, canvas.height); 
+                particles.forEach(p => { p.update(); p.draw(); }); 
+                requestAnimationFrame(animateBackground); 
+            }
+            initParticles(); 
+            animateBackground();
         }
-        function initParticles() { particles = []; for (let i = 0; i < 60; i++) particles.push(new Particle3D()); }
-        function animateBackground() { 
-            ctx.fillStyle = 'rgba(5, 7, 10, 0.15)'; 
-            ctx.fillRect(0, 0, canvas.width, canvas.height); 
-            particles.forEach(p => { p.update(); p.draw(); }); 
-            requestAnimationFrame(animateBackground); 
-        }
-        initParticles(); 
-        animateBackground();
         
         // ==================== POKRETANJE ====================
         checkUserSession();
         loadTournamentsFromFirestore();
         renderLeaderboard();
+        
+        // Expose global functions
+        window.showPage = showPage;
+        window.toggleMobileMenu = toggleMobileMenu;
+        window.signInWithGoogle = signInWithGoogle;
+        window.logoutUser = logoutUser;
+        window.toggleAuthPanels = toggleAuthPanels;
+        window.handleTournamentRegister = handleTournamentRegister;
+        window.deleteTournamentAndRefresh = deleteTournamentAndRefresh;
     </script>
 </body>
 </html>

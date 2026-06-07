@@ -7,9 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase SDK (CDN version - easier for you) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
     <style>
@@ -22,11 +21,8 @@
             --primary-dark: #cc0000;
             --secondary: #ff7700;
             --accent: #00f0ff;
-            --accent-purple: #a855f7;
             --text-main: #f3f4f6;
             --text-muted: #8a9bb5;
-            --glow-red: rgba(255, 51, 51, 0.5);
-            --glow-cyan: rgba(0, 240, 255, 0.3);
         }
 
         * {
@@ -73,13 +69,11 @@
         nav {
             background: rgba(2, 3, 4, 0.85);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255, 51, 51, 0.3);
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
-            transition: all 0.3s;
         }
 
         .nav-container {
@@ -122,6 +116,7 @@
             letter-spacing: 1.5px;
             transition: all 0.3s;
             position: relative;
+            cursor: pointer;
         }
 
         .nav-links a::after {
@@ -142,38 +137,6 @@
         .nav-links a:hover, .nav-links a.active {
             color: var(--text-main);
             text-shadow: 0 0 8px var(--primary);
-        }
-
-        .user-nav-status {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding-left: 1rem;
-            border-left: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .user-name-tag {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.85rem;
-            color: var(--accent);
-            font-weight: 700;
-        }
-
-        .btn-logout {
-            background: transparent;
-            border: 1px solid rgba(255,51,51,0.4);
-            color: var(--primary);
-            padding: 0.3rem 0.8rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.75rem;
-            transition: all 0.3s;
-        }
-
-        .btn-logout:hover {
-            background: var(--primary);
-            color: white;
         }
 
         .mobile-menu {
@@ -199,7 +162,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            cursor: pointer;
         }
 
         .mobile-menu a:hover {
@@ -249,7 +212,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 1.5rem;
-            text-shadow: 0 0 40px rgba(255, 51, 51, 0.3);
         }
 
         .hero-content p {
@@ -281,7 +243,7 @@
             letter-spacing: 1px;
             text-decoration: none;
             cursor: pointer;
-            box-shadow: 0 4px 20px var(--glow-red);
+            box-shadow: 0 4px 20px rgba(255, 51, 51, 0.5);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: inline-block;
         }
@@ -310,11 +272,6 @@
             background: rgba(255, 51, 51, 0.15);
             border-color: var(--primary);
             transform: translateY(-3px);
-        }
-
-        .btn-small {
-            padding: 0.5rem 1.2rem;
-            font-size: 0.8rem;
         }
 
         .section {
@@ -356,8 +313,6 @@
             border-radius: 20px;
             padding: 2rem;
             transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
         }
 
         .card h3 {
@@ -392,32 +347,11 @@
             border-radius: 16px;
             padding: 1.5rem;
             transition: all 0.3s;
-            position: relative;
         }
 
         .tourney-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 35px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 51, 51, 0.4);
-        }
-
-        .delete-tourney-btn {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(0,0,0,0.6);
-            border: none;
-            color: #ff5555;
-            cursor: pointer;
-            font-size: 1.1rem;
-            padding: 0.3rem 0.6rem;
-            border-radius: 50%;
-            transition: 0.2s;
-            z-index: 10;
-        }
-        .delete-tourney-btn:hover {
-            background: #ff3333;
-            color: white;
-            transform: scale(1.05);
         }
 
         .countdown-timer {
@@ -483,115 +417,6 @@
         .rank-2 { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #000; }
         .rank-3 { background: linear-gradient(135deg, #ffedd5, #ea580c); color: #000; }
 
-        .form-container {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            padding: 2.5rem;
-            border-radius: 24px;
-            max-width: 500px;
-            margin: 0 auto;
-            border: 1px solid var(--card-border);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-        }
-
-        #registerPage .form-container {
-            max-width: 650px;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.6rem;
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.9rem 1.2rem;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            color: white;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);
-            background: rgba(0, 0, 0, 0.8);
-        }
-
-        .auth-toggle-text {
-            text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .auth-toggle-text span {
-            color: var(--primary);
-            cursor: pointer;
-            font-weight: bold;
-            text-decoration: underline;
-        }
-
-        .google-login-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            background: #ffffff;
-            color: #3c4043;
-            width: 100%;
-            padding: 0.9rem;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 1.5rem;
-            transition: all 0.3s;
-            font-family: inherit;
-        }
-
-        .google-login-btn:hover {
-            background: #f1f3f4;
-            transform: translateY(-2px);
-        }
-
-        .google-login-btn i {
-            font-size: 1.3rem;
-            color: #4285f4;
-        }
-
-        .separator {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            margin-bottom: 1.5rem;
-            letter-spacing: 1px;
-        }
-
-        .separator::before, .separator::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .separator:not(:empty)::before { margin-right: .5em; }
-        .separator:not(:empty)::after { margin-left: .5em; }
-
         footer {
             background: var(--bg-deeper);
             border-top: 1px solid rgba(255, 51, 51, 0.2);
@@ -617,51 +442,11 @@
             transform: translateY(-5px) scale(1.1);
         }
 
-        .admin-form {
-            background: rgba(0,0,0,0.5);
-            border-radius: 20px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid var(--primary);
-        }
-        .admin-form h3 {
-            margin-bottom: 1rem;
-            font-family: 'Orbitron', monospace;
-        }
-        .admin-form input, .admin-form select {
-            width: 100%;
-            margin-bottom: 1rem;
-            padding: 0.8rem;
-            background: #1a1f2e;
-            border: 1px solid #333;
-            color: white;
-            border-radius: 8px;
-        }
         .mobile-menu-btn {
             display: none;
             font-size: 1.8rem;
             color: var(--primary);
             cursor: pointer;
-        }
-        
-        .error-message {
-            background: rgba(255, 51, 51, 0.2);
-            border: 1px solid var(--primary);
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 1rem 0;
-            text-align: center;
-            color: var(--primary);
-        }
-        
-        .success-message {
-            background: rgba(0, 255, 136, 0.2);
-            border: 1px solid #00ff88;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 1rem 0;
-            text-align: center;
-            color: #00ff88;
         }
 
         @media (max-width: 768px) {
@@ -671,7 +456,6 @@
             .btn-container { flex-direction: column; align-items: center; }
             .btn-main, .btn-secondary { width: 80%; text-align: center; }
             .section { padding: 6rem 1rem 3rem; }
-            .form-container { padding: 1.5rem; }
             th, td { padding: 0.8rem; font-size: 0.8rem; }
         }
     </style>
@@ -688,10 +472,6 @@
                 <li><a href="#" onclick="showPage('home'); return false;" class="active" id="nav-home">HOME</a></li>
                 <li><a href="#" onclick="showPage('tournaments'); return false;" id="nav-tournaments">TOURNAMENTS</a></li>
                 <li><a href="#" onclick="showPage('leaderboard'); return false;" id="nav-leaderboard">LEADERBOARD</a></li>
-                <li><a href="#" onclick="showPage('register'); return false;" id="nav-register">REGISTER TEAM</a></li>
-                <li id="nav-auth-wrapper">
-                    <a href="#" onclick="showPage('auth'); return false;" id="nav-auth">LOGIN</a>
-                </li>
             </ul>
             <div class="mobile-menu-btn" onclick="toggleMobileMenu()">
                 <i class="fas fa-bars"></i>
@@ -701,8 +481,6 @@
             <a href="#" onclick="showPage('home'); toggleMobileMenu(); return false;">HOME</a>
             <a href="#" onclick="showPage('tournaments'); toggleMobileMenu(); return false;">TOURNAMENTS</a>
             <a href="#" onclick="showPage('leaderboard'); toggleMobileMenu(); return false;">LEADERBOARD</a>
-            <a href="#" onclick="showPage('register'); toggleMobileMenu(); return false;">REGISTER TEAM</a>
-            <a href="#" id="mobile-nav-auth" onclick="showPage('auth'); toggleMobileMenu(); return false;">LOGIN</a>
         </div>
     </nav>
 
@@ -770,79 +548,6 @@
         </section>
     </div>
 
-    <!-- REGISTER PAGE (TEAM REGISTRATION) -->
-    <div id="registerPage" style="display: none;">
-        <section class="section">
-            <h2 class="section-title">TEAM REGISTRATION</h2>
-            <div class="form-container">
-                <form id="registerTeamForm">
-                    <div class="form-group"><label for="tname">Your Clan / Team Name</label><input type="text" id="tname" placeholder="Enter official name" required></div>
-                    <div class="form-group"><label for="discord">Captain's Discord Username</label><input type="text" id="discord" placeholder="e.g. captain_name" required></div>
-                    <div class="form-group"><label for="ids">Standoff 2 Player IDs (5 IDs)</label><input type="text" id="ids" placeholder="e.g. 12345678, 87654321, ..." required></div>
-                    <button type="submit" class="btn-main" style="width: 100%;">SUBMIT REGISTRATION</button>
-                    <div id="registerMessage" style="margin-top: 1rem; text-align: center;"></div>
-                </form>
-            </div>
-        </section>
-    </div>
-
-    <!-- AUTH PAGE (LOGIN & REGISTER) -->
-    <div id="authPage" style="display: none;">
-        <section class="section">
-            <h2 class="section-title" id="auth-title">USER LOGIN</h2>
-            
-            <div class="form-container" id="login-panel">
-                <button class="google-login-btn" onclick="signInWithGoogle()">
-                    <i class="fab fa-google"></i> Sign in with Google
-                </button>
-                <div class="separator">OR WITH EMAIL</div>
-                <form id="loginForm">
-                    <div class="form-group"><label>Email Address</label><input type="email" id="login-email" placeholder="your_email@gmail.com" required></div>
-                    <div class="form-group"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" required></div>
-                    <button type="submit" class="btn-main" style="width: 100%;">LOGIN</button>
-                    <div id="loginMessage" style="margin-top: 1rem; text-align: center;"></div>
-                </form>
-                <p class="auth-toggle-text">Don't have an account? <span onclick="toggleAuthPanels('register')">Sign up</span></p>
-            </div>
-
-            <div class="form-container" id="register-panel" style="display: none;">
-                <form id="signUpForm">
-                    <div class="form-group"><label>Username (Gaming Nick)</label><input type="text" id="reg-username" placeholder="e.g. Nugato" required></div>
-                    <div class="form-group"><label>Email Address</label><input type="email" id="reg-email" placeholder="your_email@gmail.com" required></div>
-                    <div class="form-group"><label>Password</label><input type="password" id="reg-password" placeholder="Min. 6 characters" required></div>
-                    <button type="submit" class="btn-main" style="width: 100%;">CREATE ACCOUNT</button>
-                    <div id="signUpMessage" style="margin-top: 1rem; text-align: center;"></div>
-                </form>
-                <p class="auth-toggle-text">Already have an account? <span onclick="toggleAuthPanels('login')">Login</span></p>
-            </div>
-        </section>
-    </div>
-
-    <!-- ADMIN PANEL (only for OWNER) -->
-    <div id="adminPage" style="display: none;">
-        <section class="section">
-            <h2 class="section-title">⚙️ ADMIN PANEL - MANAGE TOURNAMENTS</h2>
-            <div class="admin-form">
-                <h3><i class="fas fa-plus-circle"></i> Add New Tournament</h3>
-                <form id="adminAddTourneyForm">
-                    <input type="text" id="tourneyName" placeholder="Tournament name (e.g. HEJTERI CUP #5)" required>
-                    <input type="text" id="tourneyPrize" placeholder="Prize (e.g. 700€)" required>
-                    <input type="datetime-local" id="tourneyDate" required>
-                    <input type="text" id="tourneySlots" placeholder="Slots (e.g. 14/32)" required>
-                    <input type="text" id="tourneyFormat" placeholder="Format (e.g. 5v5)" required>
-                    <select id="tourneyIcon">
-                        <option value="fa-fire">🔥 Fire</option>
-                        <option value="fa-bolt">⚡ Bolt</option>
-                        <option value="fa-crown">👑 Crown</option>
-                        <option value="fa-skull">💀 Skull</option>
-                    </select>
-                    <button type="submit" class="btn-main" style="margin-top: 0.5rem;">➕ Create Tournament</button>
-                </form>
-            </div>
-            <div id="adminTournamentsList" style="display: grid; gap: 1rem; margin-top: 2rem;"></div>
-        </section>
-    </div>
-
     <footer>
         <div class="footer-socials">
             <a href="https://discord.gg/hejteri" target="_blank"><i class="fab fa-discord"></i></a>
@@ -854,7 +559,7 @@
     </footer>
 
     <script>
-        // ==================== FIREBASE KONFIGURACIJA - ISPRAVLJENA! ====================
+        // ==================== FIREBASE KONFIGURACIJA ====================
         const firebaseConfig = {
             apiKey: "AIzaSyChpmb1D4g3tYtHAbj7TBDI1eCg7URyT_c",
             authDomain: "hejterigg-81b50.firebaseapp.com",
@@ -865,78 +570,36 @@
         };
         
         // Inicijalizacija Firebase
-        let app, auth, db;
+        let db;
         try {
-            app = firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
+            firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
-            console.log("✅ Firebase initialized successfully with project: hejterigg-81b50");
+            console.log("✅ Firebase initialized");
         } catch (error) {
-            console.error("❌ Firebase initialization error:", error);
-            alert("Firebase initialization error. Please check your configuration.");
+            console.error("Firebase error:", error);
         }
         
         // ==================== GLOBALNE VARIJABLE ====================
         let tournaments = [];
         let countdownIntervals = [];
-        let currentUser = null;
         
-        // Default turniri za fallback
+        // Default turniri
         const defaultTournaments = [
             { name: "HEJTERI CUP #4", prize: "500€", date: "2026-06-20T18:00:00", slots: "28/64", format: "5v5", icon: "fa-fire" },
             { name: "NO MERCY 2v2", prize: "300€", date: "2026-06-25T19:00:00", slots: "18/32", format: "2v2", icon: "fa-bolt" },
             { name: "ELITE CLASH", prize: "1000€", date: "2026-07-05T20:00:00", slots: "12/16", format: "5v5", icon: "fa-crown" }
         ];
         
-        // ==================== POMOĆNE FUNKCIJE ====================
-        function showMessage(elementId, message, isError = true) {
-            const element = document.getElementById(elementId);
-            if (element) {
-                element.innerHTML = `<span style="color: ${isError ? '#ff3333' : '#00ff88'};">${isError ? '❌ ' : '✅ '}${message}</span>`;
-                setTimeout(() => {
-                    if (element.innerHTML.includes(message)) {
-                        element.innerHTML = '';
-                    }
-                }, 5000);
-            }
-        }
-        
-        function saveTournamentsToCache(tournamentsData) {
-            try {
-                localStorage.setItem('cachedTournaments', JSON.stringify(tournamentsData));
-                localStorage.setItem('cachedTournamentsTime', Date.now().toString());
-            } catch (e) {
-                console.error("Failed to cache tournaments:", e);
-            }
-        }
-        
-        function loadTournamentsFromCache() {
-            try {
-                const cached = localStorage.getItem('cachedTournaments');
-                const cachedTime = localStorage.getItem('cachedTournamentsTime');
-                if (cached && cachedTime) {
-                    const age = Date.now() - parseInt(cachedTime);
-                    if (age < 3600000) { // Cache valid 1 sat
-                        return JSON.parse(cached);
-                    }
-                }
-            } catch (e) {
-                console.error("Failed to load from cache:", e);
-            }
-            return null;
-        }
-        
         // ==================== FIRESTORE FUNKCIJE ====================
         
         async function loadTournamentsFromFirestore() {
             if (!db) {
-                console.error("Firestore not initialized");
+                console.error("Firestore not initialized, using default tournaments");
                 useDefaultTournaments();
                 return;
             }
             
             try {
-                // Pokušaj dohvatiti iz Firestore
                 const snapshot = await db.collection('tournaments').orderBy('date').get();
                 tournaments = [];
                 snapshot.forEach(doc => {
@@ -944,43 +607,20 @@
                 });
                 
                 if (tournaments.length === 0) {
-                    // Ako nema turnira, dodaj defaultne u Firestore
                     await addDefaultTournamentsToFirestore();
-                } else {
-                    // Spremi u cache
-                    saveTournamentsToCache(tournaments);
                 }
                 
                 renderTournaments();
-                renderAdminTournamentsList();
                 
             } catch (error) {
-                console.error("Greška pri učitavanju turnira:", error);
-                
-                // Pokušaj učitati iz cache-a
-                const cachedTournaments = loadTournamentsFromCache();
-                if (cachedTournaments && cachedTournaments.length > 0) {
-                    console.log("Using cached tournaments");
-                    tournaments = cachedTournaments;
-                    renderTournaments();
-                    renderAdminTournamentsList();
-                    showMessage('tournamentsList', 'Using cached data. Some features may be limited.', true);
-                } else {
-                    // Koristi defaultne turnire
-                    useDefaultTournaments();
-                }
+                console.error("Error loading tournaments:", error);
+                useDefaultTournaments();
             }
         }
         
         function useDefaultTournaments() {
             tournaments = defaultTournaments.map((t, index) => ({ id: `default-${index}`, ...t }));
             renderTournaments();
-            renderAdminTournamentsList();
-            const container = document.getElementById('tournamentsList');
-            if (container && tournaments.length > 0) {
-                // Ne prikazuj grešku ako imamo turnire
-                console.log("Using default tournaments as fallback");
-            }
         }
         
         async function addDefaultTournamentsToFirestore() {
@@ -997,196 +637,6 @@
             }
         }
         
-        async function addTournament(tourney) {
-            if (!db) {
-                alert("Firebase not connected. Cannot add tournament.");
-                return false;
-            }
-            
-            try {
-                const docRef = await db.collection('tournaments').add(tourney);
-                tournaments.push({ id: docRef.id, ...tourney });
-                saveTournamentsToCache(tournaments);
-                renderTournaments();
-                renderAdminTournamentsList();
-                return true;
-            } catch (error) {
-                console.error("Greška pri dodavanju turnira:", error);
-                alert(`Failed to add tournament: ${error.message}`);
-                return false;
-            }
-        }
-        
-        async function deleteTournamentById(id) {
-            if (!db) {
-                alert("Firebase not connected. Cannot delete tournament.");
-                return false;
-            }
-            
-            try {
-                await db.collection('tournaments').doc(id).delete();
-                tournaments = tournaments.filter(t => t.id !== id);
-                saveTournamentsToCache(tournaments);
-                renderTournaments();
-                renderAdminTournamentsList();
-                return true;
-            } catch (error) {
-                console.error("Greška pri brisanju turnira:", error);
-                alert(`Failed to delete tournament: ${error.message}`);
-                return false;
-            }
-        }
-        
-        // ==================== AUTH FUNKCIJE ====================
-        
-        async function signInWithGoogle() {
-            if (!auth) {
-                alert("Firebase Auth not initialized. Please check your configuration.");
-                return;
-            }
-            
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({
-                prompt: 'select_account'
-            });
-            
-            try {
-                const result = await auth.signInWithPopup(provider);
-                currentUser = result.user;
-                showMessage('loginMessage', 'Login successful! Redirecting...', false);
-                
-                // Spremi usera u Firestore ako ne postoji
-                if (db) {
-                    const userRef = db.collection('users').doc(currentUser.uid);
-                    const userDoc = await userRef.get();
-                    if (!userDoc.exists) {
-                        await userRef.set({
-                            username: currentUser.displayName || currentUser.email.split('@')[0],
-                            email: currentUser.email,
-                            createdAt: new Date().toISOString()
-                        });
-                    }
-                }
-                
-                setTimeout(() => {
-                    checkUserSession();
-                    showPage('home');
-                }, 1500);
-            } catch (error) {
-                console.error("Google login error:", error);
-                if (error.code === 'auth/popup-blocked') {
-                    alert("Popup was blocked! Please allow popups for this site and try again.");
-                } else if (error.code === 'auth/unauthorized-domain') {
-                    alert("This domain is not authorized for Firebase. Please add it to Firebase Console → Authentication → Authorized domains.");
-                } else {
-                    showMessage('loginMessage', `Login failed: ${error.message}`, true);
-                }
-            }
-        }
-        
-        async function signUpWithEmail(email, password, username) {
-            if (!auth) {
-                alert("Firebase Auth not initialized.");
-                return { success: false, error: "Auth not initialized" };
-            }
-            
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                if (db) {
-                    await db.collection('users').doc(userCredential.user.uid).set({
-                        username: username,
-                        email: email,
-                        createdAt: new Date().toISOString()
-                    });
-                }
-                return { success: true };
-            } catch (error) {
-                console.error("Signup error:", error);
-                return { success: false, error: error.message };
-            }
-        }
-        
-        async function signInWithEmail(email, password) {
-            if (!auth) {
-                alert("Firebase Auth not initialized.");
-                return { success: false, error: "Auth not initialized" };
-            }
-            
-            try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                return { success: true, user: userCredential.user };
-            } catch (error) {
-                console.error("Login error:", error);
-                return { success: false, error: error.message };
-            }
-        }
-        
-        async function logoutUser() {
-            if (!auth) return;
-            
-            try {
-                await auth.signOut();
-                currentUser = null;
-                checkUserSession();
-                showPage('home');
-                showMessage('loginMessage', 'Logged out successfully!', false);
-            } catch (error) {
-                console.error("Logout error:", error);
-                alert(`Logout failed: ${error.message}`);
-            }
-        }
-        
-        function checkUserSession() {
-            if (!auth) return;
-            
-            auth.onAuthStateChanged(async (user) => {
-                currentUser = user;
-                const desktopWrapper = document.getElementById('nav-auth-wrapper');
-                const mobileAuthBtn = document.getElementById('mobile-nav-auth');
-                const isOwner = user && user.email === 'owner@hejteri.gg';
-                
-                // Admin link management
-                let adminLinkExists = document.getElementById('nav-admin-wrapper');
-                if(isOwner && !adminLinkExists) {
-                    const navLinks = document.querySelector('.nav-links');
-                    const registerLi = document.getElementById('nav-register')?.parentNode;
-                    if (navLinks && registerLi) {
-                        const newLi = document.createElement('li');
-                        newLi.id = 'nav-admin-wrapper';
-                        newLi.innerHTML = '<a href="#" onclick="showPage(\'admin\'); return false;" id="nav-admin">🔧 ADMIN</a>';
-                        registerLi.insertAdjacentElement('afterend', newLi);
-                    }
-                } else if(!isOwner && adminLinkExists) {
-                    adminLinkExists.remove();
-                }
-                
-                if (user) {
-                    let displayName = user.displayName || user.email.split('@')[0];
-                    if (user.email === 'owner@hejteri.gg') displayName = '👑 OWNER';
-                    
-                    if (desktopWrapper) {
-                        desktopWrapper.innerHTML = `<div class="user-nav-status">
-                            <span class="user-name-tag"><i class="fas fa-user-shield"></i> ${escapeHtml(displayName)}</span>
-                            <button class="btn-logout" onclick="logoutUser()">LOGOUT</button>
-                        </div>`;
-                    }
-                    
-                    if(mobileAuthBtn) { 
-                        mobileAuthBtn.innerHTML = `<i class="fas fa-sign-out-alt"></i> LOGOUT (${escapeHtml(displayName)})`; 
-                        mobileAuthBtn.setAttribute('onclick', 'logoutUser(); toggleMobileMenu(); return false;'); 
-                    }
-                } else {
-                    if (desktopWrapper) {
-                        desktopWrapper.innerHTML = `<a href="#" onclick="showPage('auth'); return false;" id="nav-auth">LOGIN</a>`;
-                    }
-                    if(mobileAuthBtn) { 
-                        mobileAuthBtn.innerHTML = "LOGIN"; 
-                        mobileAuthBtn.setAttribute('onclick', "showPage('auth'); toggleMobileMenu(); return false;"); 
-                    }
-                }
-            });
-        }
-        
         // ==================== UI FUNKCIJE ====================
         
         function renderTournaments() {
@@ -1194,65 +644,26 @@
             if (!container) return;
             
             if (tournaments.length === 0) {
-                container.innerHTML = '<div class="error-message">No tournaments available at the moment.</div>';
+                container.innerHTML = '<div style="color: #ff3333; text-align: center;">No tournaments available.</div>';
                 return;
             }
             
             container.innerHTML = '';
-            const isOwner = currentUser && currentUser.email === 'owner@hejteri.gg';
             
             tournaments.forEach(t => {
                 const card = document.createElement('div');
                 card.className = 'tourney-card';
-                let deleteBtn = '';
-                if(isOwner && t.id && !t.id.toString().startsWith('default-')) {
-                    deleteBtn = `<button class="delete-tourney-btn" onclick="event.stopPropagation(); deleteTournamentAndRefresh('${t.id}')"><i class="fas fa-trash-alt"></i></button>`;
-                }
                 card.innerHTML = `
-                    ${deleteBtn}
-                    <i class="fas ${t.icon || 'fa-trophy'}" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem; display: inline-block;"></i>
+                    <i class="fas ${t.icon || 'fa-trophy'}" style="font-size: 2rem; color: #ff3333; margin-bottom: 1rem; display: inline-block;"></i>
                     <h3 style="font-size: 1.4rem; margin-bottom: 1rem;">${escapeHtml(t.name)}</h3>
                     <p><i class="fas fa-tag"></i> Prize: ${escapeHtml(t.prize)}</p>
                     <p><i class="fas fa-users"></i> Slots: ${escapeHtml(t.slots)}</p>
                     <p><i class="fas fa-gamepad"></i> Format: ${escapeHtml(t.format)}</p>
                     <div class="countdown-timer" style="margin: 1rem 0;" data-date="${t.date}">--d --h --m</div>
-                    <button class="btn-main btn-small" onclick="handleTournamentRegister('${escapeHtml(t.name)}')">REGISTER TEAM</button>
                 `;
                 container.appendChild(card);
             });
             startAllCountdowns();
-        }
-        
-        async function deleteTournamentAndRefresh(id) {
-            if(confirm("Are you sure you want to delete this tournament?")) {
-                await deleteTournamentById(id);
-            }
-        }
-        
-        function renderAdminTournamentsList() {
-            const container = document.getElementById('adminTournamentsList');
-            if(!container) return;
-            
-            if (tournaments.length === 0) {
-                container.innerHTML = '<p>No tournaments found.</p>';
-                return;
-            }
-            
-            container.innerHTML = '<h3 style="color:var(--accent); margin-bottom: 1rem;">📋 All Tournaments:</h3>';
-            tournaments.forEach(t => {
-                const div = document.createElement('div');
-                div.className = 'tourney-card';
-                div.style.marginBottom = '1rem';
-                div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items:center; flex-wrap: wrap; gap: 1rem;">
-                        <div>
-                            <strong>${escapeHtml(t.name)}</strong> | ${escapeHtml(t.prize)} | ${t.date} | Slots: ${escapeHtml(t.slots)}
-                        </div>
-                        ${t.id && !t.id.toString().startsWith('default-') ? `<button class="btn-small" style="background:#ff3333; border:none; padding:0.3rem 0.8rem; border-radius:8px; cursor:pointer;" onclick="deleteTournamentAndRefresh('${t.id}')">Delete</button>` : '<span style="color:#888;">(Demo)</span>'}
-                    </div>
-                `;
-                container.appendChild(div);
-            });
         }
         
         function escapeHtml(str) { 
@@ -1310,53 +721,33 @@
                     <td><strong style="color: #fff;">${escapeHtml(team.name)}</strong></td>
                     <td>${team.matches}</td>
                     <td>${team.wins}</td>
-                    <td style="color: var(--accent); font-weight: 700;">${team.points}</td>
+                    <td style="color: #00f0ff; font-weight: 700;">${team.points}</td>
                 `;
                 tbody.appendChild(row);
             });
         }
         
         function showPage(page) {
-            const pages = ['homePage', 'tournamentsPage', 'leaderboardPage', 'registerPage', 'authPage', 'adminPage'];
-            pages.forEach(p => {
-                const el = document.getElementById(p);
-                if (el) el.style.display = 'none';
-            });
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('tournamentsPage').style.display = 'none';
+            document.getElementById('leaderboardPage').style.display = 'none';
             
-            const pageMap = {
-                'home': 'homePage',
-                'tournaments': 'tournamentsPage',
-                'leaderboard': 'leaderboardPage',
-                'register': 'registerPage',
-                'auth': 'authPage',
-                'admin': 'adminPage'
-            };
-            
-            const targetPage = pageMap[page];
-            if (targetPage) {
-                const el = document.getElementById(targetPage);
-                if (el) el.style.display = 'block';
-            }
-            
-            // Refresh data when showing specific pages
-            if (page === 'tournaments') {
+            if (page === 'home') {
+                document.getElementById('homePage').style.display = 'block';
+            } else if (page === 'tournaments') {
+                document.getElementById('tournamentsPage').style.display = 'block';
                 renderTournaments();
-            }
-            if (page === 'leaderboard') {
+            } else if (page === 'leaderboard') {
+                document.getElementById('leaderboardPage').style.display = 'block';
                 renderLeaderboard();
             }
-            if (page === 'admin' && (!currentUser || currentUser.email !== 'owner@hejteri.gg')) {
-                alert("Access denied. Admin only.");
-                showPage('home');
-                return;
-            }
             
-            // Update active nav links
             document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-            const activeNav = document.getElementById(`nav-${page === 'home' ? 'home' : page === 'tournaments' ? 'tournaments' : page === 'leaderboard' ? 'leaderboard' : page === 'register' ? 'register' : page === 'auth' ? 'auth' : page === 'admin' ? 'admin' : ''}`);
-            if (activeNav) activeNav.classList.add('active');
+            if (page === 'home') document.getElementById('nav-home')?.classList.add('active');
+            if (page === 'tournaments') document.getElementById('nav-tournaments')?.classList.add('active');
+            if (page === 'leaderboard') document.getElementById('nav-leaderboard')?.classList.add('active');
             
-            window.scrollTo(0,0);
+            window.scrollTo(0, 0);
         }
         
         function toggleMobileMenu() { 
@@ -1365,150 +756,6 @@
                 menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex'; 
             }
         }
-        
-        function toggleAuthPanels(panel) {
-            const loginPanel = document.getElementById('login-panel');
-            const registerPanel = document.getElementById('register-panel');
-            const authTitle = document.getElementById('auth-title');
-            if (panel === 'register') { 
-                if (loginPanel) loginPanel.style.display = 'none'; 
-                if (registerPanel) registerPanel.style.display = 'block'; 
-                if (authTitle) authTitle.innerText = "CREATE NEW ACCOUNT"; 
-            } else { 
-                if (loginPanel) loginPanel.style.display = 'block'; 
-                if (registerPanel) registerPanel.style.display = 'none'; 
-                if (authTitle) authTitle.innerText = "USER LOGIN"; 
-            }
-        }
-        
-        function handleTournamentRegister(tName) {
-            if(!currentUser) { 
-                alert(`You must be logged in to register for ${tName}!`); 
-                showPage('auth'); 
-            } else { 
-                showPage('register'); 
-                const teamNameInput = document.getElementById('tname');
-                if (teamNameInput) {
-                    teamNameInput.value = `${currentUser.displayName || currentUser.email.split('@')[0]}'s Team`; 
-                }
-            }
-        }
-        
-        // ==================== EVENT LISTENERS ====================
-        
-        document.getElementById('loginForm')?.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email')?.value.trim();
-            const password = document.getElementById('login-password')?.value;
-            if (!email || !password) {
-                showMessage('loginMessage', 'Please enter email and password', true);
-                return;
-            }
-            const result = await signInWithEmail(email, password);
-            if (result.success) {
-                showMessage('loginMessage', 'Login successful! Redirecting...', false);
-                setTimeout(() => { 
-                    showPage('home'); 
-                    document.getElementById('loginForm')?.reset();
-                }, 1500);
-            } else {
-                showMessage('loginMessage', result.error, true);
-            }
-        });
-        
-        document.getElementById('signUpForm')?.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const username = document.getElementById('reg-username')?.value.trim();
-            const email = document.getElementById('reg-email')?.value.trim();
-            const password = document.getElementById('reg-password')?.value;
-            
-            if (!username || !email || !password) {
-                showMessage('signUpMessage', 'Please fill all fields', true);
-                return;
-            }
-            if (password.length < 6) { 
-                showMessage('signUpMessage', 'Password must be at least 6 characters', true);
-                return; 
-            }
-            
-            const result = await signUpWithEmail(email, password, username);
-            if (result.success) {
-                showMessage('signUpMessage', 'Account created! Please login.', false);
-                setTimeout(() => { 
-                    toggleAuthPanels('login');
-                    document.getElementById('signUpForm')?.reset();
-                }, 2000);
-            } else {
-                showMessage('signUpMessage', result.error, true);
-            }
-        });
-        
-        document.getElementById('registerTeamForm')?.addEventListener('submit', async function(e) { 
-            e.preventDefault(); 
-            if (!currentUser) {
-                alert("You must be logged in to register a team!");
-                showPage('auth');
-                return;
-            }
-            
-            const teamName = document.getElementById('tname')?.value;
-            const discord = document.getElementById('discord')?.value;
-            const ids = document.getElementById('ids')?.value;
-            
-            if (!teamName || !discord || !ids) {
-                showMessage('registerMessage', 'Please fill all fields', true);
-                return;
-            }
-            
-            if (!db) {
-                showMessage('registerMessage', 'Cannot register - Firebase not connected. Please try again later.', true);
-                return;
-            }
-            
-            try {
-                await db.collection('teamRegistrations').add({
-                    teamName: teamName,
-                    discord: discord,
-                    playerIds: ids,
-                    userId: currentUser.uid,
-                    userEmail: currentUser.email,
-                    createdAt: new Date().toISOString()
-                });
-                showMessage('registerMessage', 'Team registration submitted successfully!', false);
-                e.target.reset();
-                setTimeout(() => { showPage('home'); }, 2000);
-            } catch (error) {
-                console.error("Registration error:", error);
-                showMessage('registerMessage', `Registration failed: ${error.message}`, true);
-            }
-        });
-        
-        document.getElementById('adminAddTourneyForm')?.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            if (!currentUser || currentUser.email !== 'owner@hejteri.gg') { 
-                alert("Only owner can add tournaments."); 
-                return; 
-            }
-            
-            const name = document.getElementById('tourneyName')?.value.trim();
-            const prize = document.getElementById('tourneyPrize')?.value.trim();
-            const dateRaw = document.getElementById('tourneyDate')?.value;
-            const slots = document.getElementById('tourneySlots')?.value.trim();
-            const format = document.getElementById('tourneyFormat')?.value.trim();
-            const icon = document.getElementById('tourneyIcon')?.value;
-            
-            if(!name || !prize || !dateRaw || !slots || !format) { 
-                alert("Please fill all fields!"); 
-                return; 
-            }
-            
-            const dateISO = new Date(dateRaw).toISOString().slice(0,16).replace('T','T');
-            const success = await addTournament({ name, prize, date: dateISO, slots, format, icon });
-            if (success) {
-                alert(`Tournament "${name}" added successfully!`);
-                e.target.reset();
-            }
-        });
         
         // ==================== CANVAS ANIMACIJA ====================
         const canvas = document.getElementById('bg-canvas');
@@ -1560,18 +807,12 @@
         }
         
         // ==================== POKRETANJE ====================
-        checkUserSession();
         loadTournamentsFromFirestore();
         renderLeaderboard();
         
         // Expose global functions
         window.showPage = showPage;
         window.toggleMobileMenu = toggleMobileMenu;
-        window.signInWithGoogle = signInWithGoogle;
-        window.logoutUser = logoutUser;
-        window.toggleAuthPanels = toggleAuthPanels;
-        window.handleTournamentRegister = handleTournamentRegister;
-        window.deleteTournamentAndRefresh = deleteTournamentAndRefresh;
     </script>
 </body>
 </html>
